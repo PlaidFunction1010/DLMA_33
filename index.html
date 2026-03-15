@@ -14,87 +14,18 @@
             --text-color: #333;
             --accent-color: #3498db;
         }
-        body {
-            font-family: "Microsoft JhengHei", sans-serif;
-            margin: 0;
-            display: flex;
-            background-color: var(--primary-bg);
-            color: white;
-        }
-        /* 側邊欄 */
-        #sidebar {
-            width: 260px;
-            height: 100vh;
-            background: var(--sidebar-bg);
-            position: fixed;
-            padding: 20px;
-            box-sizing: border-box;
-            border-right: 2px solid #444;
-            overflow-y: auto;
-        }
-        .chapter-btn {
-            display: block;
-            width: 100%;
-            padding: 12px;
-            margin: 8px 0;
-            background: #3d3d3d;
-            border: 1px solid #555;
-            color: #eee;
-            text-align: left;
-            cursor: pointer;
-            border-radius: 6px;
-        }
+        body { font-family: "Microsoft JhengHei", sans-serif; margin: 0; display: flex; background-color: var(--primary-bg); color: white; }
+        #sidebar { width: 260px; height: 100vh; background: var(--sidebar-bg); position: fixed; padding: 20px; box-sizing: border-box; border-right: 2px solid #444; overflow-y: auto; }
+        .chapter-btn { display: block; width: 100%; padding: 12px; margin: 8px 0; background: #3d3d3d; border: 1px solid #555; color: #eee; text-align: left; cursor: pointer; border-radius: 6px; }
         .chapter-btn:hover { background: var(--accent-color); }
-        
-        /* 主要內容 */
-        #main-content {
-            margin-left: 260px;
-            padding: 40px;
-            width: 100%;
-            max-width: 900px;
-            color: var(--text-color);
-        }
-        .question-card {
-            background: var(--card-bg);
-            padding: 25px;
-            border-radius: 12px;
-            margin-bottom: 30px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
-        }
-        .topic-tag {
-            display: inline-block;
-            background: #e1f5fe;
-            color: #01579b;
-            padding: 2px 8px;
-            border-radius: 4px;
-            font-size: 0.85rem;
-            margin-bottom: 10px;
-        }
+        #main-content { margin-left: 260px; padding: 40px; width: 100%; max-width: 900px; color: var(--text-color); }
+        .question-card { background: var(--card-bg); padding: 25px; border-radius: 12px; margin-bottom: 30px; box-shadow: 0 4px 15px rgba(0,0,0,0.3); }
+        .topic-tag { display: inline-block; background: #e1f5fe; color: #01579b; padding: 2px 8px; border-radius: 4px; font-size: 0.85rem; margin-bottom: 10px; }
         .question-text { font-size: 1.1rem; line-height: 1.6; margin-bottom: 20px; }
-        
-        /* 選項按鈕 */
         .options-grid { display: flex; flex-direction: column; gap: 10px; }
-        .option-btn {
-            padding: 12px 15px;
-            border: 1px solid #ddd;
-            border-radius: 8px;
-            background: #f9f9f9;
-            text-align: left;
-            cursor: pointer;
-            transition: 0.2s;
-            font-size: 1rem;
-        }
+        .option-btn { padding: 12px 15px; border: 1px solid #ddd; border-radius: 8px; background: #f9f9f9; text-align: left; cursor: pointer; transition: 0.2s; font-size: 1rem; }
         .option-btn:hover { background: #edf7ff; border-color: var(--accent-color); }
-        
-        /* 解答區 */
-        .explanation {
-            margin-top: 15px;
-            padding: 15px;
-            background: #f0fdf4;
-            border-left: 4px solid #22c55e;
-            display: none;
-            border-radius: 4px;
-        }
+        .explanation { margin-top: 15px; padding: 15px; background: #f0fdf4; border-left: 4px solid #22c55e; display: none; border-radius: 4px; }
         .status-msg { font-weight: bold; margin-bottom: 10px; }
     </style>
 </head>
@@ -117,32 +48,41 @@
 </div>
 
 <script>
-    const csvUrl = "https://docs.google.com/spreadsheets/d/e/2PACX-1vS7n1NCzcwQpMfJaxFaVJwtRQFeoABAGNgoyh_cC6LzrF8RVp-1OujZgMXO-uR1XZtL9VZIxFLQjnzs/pub?gid=0&single=true&output=csv";
+    const csvUrl = "https://docs.google.com/spreadsheets/d/e/2PACX-1vS7n1NCzcwQpMfJaxFaVJwtRQFeoABAGNgoyh_cC6LzrF8RVp-1OujZgMXO-uR1XZtL9VZIxFLQjnzs/pub?output=csv";
     let allData = [];
 
     async function init() {
         try {
             const response = await fetch(csvUrl);
-            const data = await response.text();
-            allData = parseCSV(data);
+            const csvText = await response.text();
+            allData = parseCSV(csvText);
+            console.log("資料載入成功，共 " + allData.length + " 題");
         } catch (e) { console.error("載入失敗", e); }
     }
 
     function parseCSV(text) {
-        const rows = text.split('\n').filter(row => row.trim() !== '');
-        return rows.slice(1).map(row => {
-            // 使用正規表達式處理 CSV 的逗號問題（避免 LaTeX 內的逗號誤判）
-            const cols = row.match(/(".*?"|[^",\s]+)(?=\s*,|\s*$)/g) || [];
-            const cleanCols = cols.map(c => c.replace(/^"|"$/g, '').trim());
+        const rows = text.split(/\r?\n/);
+        const result = [];
+        
+        // 從索引 2 開始（跳過第1列標題與第2列英文說明）
+        for (let i = 2; i < rows.length; i++) {
+            if (!rows[i].trim()) continue;
+
+            // 嚴謹解析：處理引號內的內容
+            const matches = rows[i].match(/(".*?"|[^",\s]+)(?=\s*,|\s*$)/g);
+            if (!matches || matches.length < 4) continue;
             
-            return {
-                chapter: cleanCols[0],
-                topic: cleanCols[1],
-                rawContent: cleanCols[2],
-                answer: cleanCols[3],
-                solution: cleanCols[4]
-            };
-        });
+            const cleanCols = matches.map(c => c.replace(/^"|"$/g, '').trim());
+
+            result.push({
+                chapter: cleanCols[0], // A:章節
+                topic: cleanCols[1],   // B:主題
+                rawContent: cleanCols[2], // C:題目內容
+                answer: cleanCols[3],  // D:答案
+                solution: cleanCols[4] || "" // E:詳細解答
+            });
+        }
+        return result;
     }
 
     function loadChapter(chapterName) {
@@ -152,8 +92,14 @@
 
         const filtered = allData.filter(q => q.chapter === chapterName);
 
+        if (filtered.length === 0) {
+            container.innerHTML = `<p style="color:gray">目前「${chapterName}」沒有題目，請確認試算表 A 欄是否為「${chapterName}」。</p>`;
+            return;
+        }
+
         filtered.forEach((q, idx) => {
-            // 自動解析題目與 (1)~(5) 選項
+            // 切分題目主體與 (1)~(5) 選項
+            // 由於你的內容裡括號可能包含 LaTeX，我們使用強大的正規表達式
             const parts = q.rawContent.split(/\(\d\)/);
             const questionText = parts[0];
             const options = q.rawContent.match(/\(\d\)[^(\n]*/g) || [];
@@ -177,15 +123,13 @@
             `;
             container.appendChild(card);
         });
-        MathJax.typeset();
+        if (window.MathJax) MathJax.typeset();
     }
 
     function checkAnswer(btn, selectedNum, correctAns, idx) {
         const expDiv = document.getElementById(`ans-${idx}`);
         const status = expDiv.querySelector('.status-msg');
-        
-        // 支援 A 欄位輸入 "1" 或 "(1)" 都能判斷
-        const cleanCorrect = correctAns.replace(/\(|\)/g, "");
+        const cleanCorrect = correctAns.replace(/\(|\)/g, "").trim();
         
         expDiv.style.display = "block";
         if (selectedNum === cleanCorrect) {
