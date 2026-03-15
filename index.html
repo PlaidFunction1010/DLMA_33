@@ -3,172 +3,185 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DLMA_33 小試身手 - 修正版</title>
-    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
-    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <title>plaidfunction1010 | 數學練習戰情室</title>
+    
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+
     <style>
-        :root {
-            --primary-bg: #1a1a1a;
-            --sidebar-bg: #2d2d2d;
-            --card-bg: #ffffff;
-            --text-color: #333;
-            --accent-color: #3498db;
+        :root { 
+            --sidebar-width: 280px; 
+            --primary-gradient: linear-gradient(135deg, #1e272e 0%, #000000 100%);
+            --accent-color: #3498db; 
+            --bg-color: #f4f6f8; 
+            --card-shadow: 0 10px 40px rgba(0,0,0,0.08);
+            --success-color: #27ae60;
         }
-        body { font-family: "Microsoft JhengHei", sans-serif; margin: 0; display: flex; background-color: var(--primary-bg); color: white; }
-        #sidebar { width: 260px; height: 100vh; background: var(--sidebar-bg); position: fixed; padding: 20px; box-sizing: border-box; border-right: 2px solid #444; overflow-y: auto; }
-        .chapter-btn { display: block; width: 100%; padding: 12px; margin: 8px 0; background: #3d3d3d; border: 1px solid #555; color: #eee; text-align: left; cursor: pointer; border-radius: 6px; }
-        .chapter-btn:hover { background: var(--accent-color); }
-        #main-content { margin-left: 260px; padding: 40px; width: 100%; max-width: 900px; color: var(--text-color); }
-        .question-card { background: var(--card-bg); padding: 25px; border-radius: 12px; margin-bottom: 30px; box-shadow: 0 4px 15px rgba(0,0,0,0.3); }
-        .topic-tag { display: inline-block; background: #e1f5fe; color: #01579b; padding: 2px 8px; border-radius: 4px; font-size: 0.85rem; margin-bottom: 10px; }
-        .question-text { font-size: 1.1rem; line-height: 1.6; margin-bottom: 20px; }
-        .options-grid { display: flex; flex-direction: column; gap: 10px; }
-        .option-btn { padding: 12px 15px; border: 1px solid #ddd; border-radius: 8px; background: #f9f9f9; text-align: left; cursor: pointer; transition: 0.2s; font-size: 1rem; color: #333;}
-        .option-btn:hover { background: #edf7ff; border-color: var(--accent-color); }
-        .explanation { margin-top: 15px; padding: 15px; background: #f0fdf4; border-left: 4px solid #22c55e; display: none; border-radius: 4px; }
-        .status-msg { font-weight: bold; margin-bottom: 10px; }
+
+        body { 
+            font-family: 'Noto Sans TC', sans-serif; 
+            margin: 0; display: flex; height: 100vh; 
+            background-color: var(--bg-color);
+            -webkit-user-select: none; user-select: none;
+        }
+
+        /* 側邊欄優化 */
+        #sidebar { 
+            width: var(--sidebar-width); 
+            background: var(--primary-gradient); 
+            color: white; display: flex; flex-direction: column;
+            box-shadow: 4px 0 15px rgba(0,0,0,0.2);
+        }
+
+        #sidebar h2 { padding: 30px 20px; font-size: 1.5rem; text-align: center; border-bottom: 1px solid rgba(255,255,255,0.1); }
+
+        .unit-list-container { flex-grow: 1; overflow-y: auto; }
+        .unit-item { padding: 15px 25px; cursor: pointer; transition: 0.3s; color: #95a5a6; border-left: 4px solid transparent; }
+        .unit-item:hover { background: rgba(255,255,255,0.05); color: white; }
+        .unit-item.active { background: rgba(52, 152, 219, 0.2); border-left: 4px solid var(--accent-color); color: white; }
+
+        #main-content { flex-grow: 1; padding: 40px; overflow-y: auto; scroll-behavior: smooth; }
+
+        .card { 
+            background: white; padding: 30px; border-radius: 15px; 
+            box-shadow: var(--card-shadow); margin-bottom: 35px; color: #333;
+        }
+
+        .theme-badge { background: #e3f2fd; color: #1976d2; padding: 3px 12px; border-radius: 5px; font-size: 0.8rem; font-weight: bold; margin-bottom: 15px; display: inline-block; }
+        .problem-text { font-size: 1.2rem; line-height: 1.8; margin-bottom: 25px; }
+
+        /* 選項網格 */
+        .options-grid { display: flex; flex-direction: column; gap: 12px; margin-bottom: 25px; }
+        .opt-card { 
+            padding: 15px 20px; border: 1.5px solid #eee; border-radius: 10px; 
+            cursor: pointer; transition: 0.2s; background: #fff;
+        }
+        .opt-card:hover { border-color: var(--accent-color); background: #f0f7ff; }
+        .opt-card.correct { background: var(--success-color) !important; color: white; border-color: var(--success-color); }
+        .opt-card.wrong { background: #e74c3c !important; color: white; border-color: #c0392b; }
+
+        .btn-sol-toggle { background: #eee; color: #555; padding: 10px; border-radius: 8px; border: none; cursor: pointer; width: 100%; font-weight: bold; }
+        .sol-content { margin-top: 15px; padding: 20px; background: #fffde7; border-left: 5px solid #f1c40f; display: none; border-radius: 8px; }
+
+        #visitor-counter { position: fixed; bottom: 15px; left: 15px; background: rgba(0,0,0,0.8); padding: 5px 12px; border-radius: 20px; color: white; font-size: 12px; }
     </style>
 </head>
-<body>
+<body oncontextmenu="return false;">
 
-<div id="sidebar">
-    <h2 style="color:var(--accent-color)">DLMA_33</h2>
-    <p style="font-size:0.9rem; color:#888;">選擇練習章節t：</p>
-    <div id="chapter-list">
-        <button class="chapter-btn" onclick="loadChapter('第一章')">第一章</button>
-        <button class="chapter-btn" onclick="loadChapter('第二章')">第二章</button>
-        <button class="chapter-btn" onclick="loadChapter('第三章')">第三章</button>
-        <button class="chapter-btn" onclick="loadChapter('第四章')">第四章</button>
+    <nav id="sidebar">
+        <h2>Plaid Math</h2>
+        <div class="unit-list-container" id="unit-list"></div>
+    </nav>
+
+    <main id="main-content">
+        <div id="display-area">
+            <div style="text-align:center; margin-top:150px; color:gray;">
+                <h1>歡迎來到數學戰情室</h1>
+                <p>請從左側選單選擇章節練習</p>
+            </div>
+        </div>
+    </main>
+
+    <div id="visitor-counter">
+        🚀 人氣：<img src="https://hits.dwyl.com/plaidfunction1010/runningmath.svg" style="vertical-align: middle;">
     </div>
-</div>
 
-<div id="main-content">
-    <h1 id="current-chapter-title" style="color:white">請選擇章節</h1>
-    <div id="questions-container"></div>
-</div>
+    <script>
+        const sheetCsvUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTA19q_bXVl7XZPAf4ImCJEWZfs_zJwFuSFsBmAf3n-_I_zrkb8cuzyxMWrUJhpBB7xpnQ9baoEDh1U/pub?output=csv'; 
+        let allData = [];
 
-<script>
-    const csvUrl = "https://docs.google.com/spreadsheets/d/e/2PACX-1vS7n1NCzcwQpMfJaxFaVJwtRQFeoABAGNgoyh_cC6LzrF8RVp-1OujZgMXO-uR1XZtL9VZIxFLQjnzs/pub?gid=0&single=true&output=csv";
-    let allData = [];
-
-    async function init() {
-        try {
-            const response = await fetch(csvUrl);
-            const csvText = await response.text();
-            allData = parseCSV(csvText);
-            console.log("資料載入成功，共 " + allData.length + " 題");
-        } catch (e) { console.error("載入失敗", e); }
-    }
-
-    function parseCSV(text) {
-        const rows = text.split(/\r?\n/);
-        const result = [];
-        
-        // 從索引 2 開始（跳過第1列標題與第2列英文說明）
-        for (let i = 2; i < rows.length; i++) {
-            if (!rows[i].trim()) continue;
-
-            const matches = rows[i].match(/(".*?"|[^",\s]+)(?=\s*,|\s*$)/g);
-            if (!matches || matches.length < 4) continue;
-            
-            const cleanCols = matches.map(c => c.replace(/^"|"$/g, '').trim());
-
-            result.push({
-                chapter: cleanCols[0], 
-                topic: cleanCols[1],   
-                rawContent: cleanCols[2], 
-                answer: cleanCols[3],  
-                solution: cleanCols[4] || "" 
+        function init() {
+            Papa.parse(sheetCsvUrl, {
+                download: true, header: true,
+                complete: function(results) {
+                    // 跳過前兩列英文與標題說明，過濾空行
+                    allData = results.data.slice(1).filter(r => r['章節'] || r['Unit']);
+                    renderSidebar();
+                }
             });
         }
-        return result;
-    }
 
-    function loadChapter(chapterName) {
-        document.getElementById('current-chapter-title').innerText = chapterName;
-        const container = document.getElementById('questions-container');
-        container.innerHTML = "";
-
-        const filtered = allData.filter(q => q.chapter === chapterName);
-
-        if (filtered.length === 0) {
-            container.innerHTML = `<p style="color:gray">目前「${chapterName}」沒有題目。</p>`;
-            return;
+        function renderSidebar() {
+            const container = document.getElementById('unit-list');
+            const units = [...new Set(allData.map(d => d['章節'] || d['Unit']))];
+            container.innerHTML = units.map(u => `<div class="unit-item" onclick="loadUnit('${u}', this)">${u}</div>`).join('');
         }
 
-        filtered.forEach((q, idx) => {
-            // 【核心修正】嚴謹選項切分邏輯
+        function loadUnit(unitName, el) {
+            document.querySelectorAll('.unit-item').forEach(i => i.classList.remove('active'));
+            el.classList.add('active');
             
-            // Regex: 尋找 (1), (2), (3), (4), (5)
-            const optionRegex = /(\(\d\))/g;
+            const area = document.getElementById('display-area');
+            const problems = allData.filter(d => (d['章節'] || d['Unit']) === unitName);
             
-            // 找出所有括號選項出現的位置
-            let match;
-            const positions = [];
-            while ((match = optionRegex.exec(q.rawContent)) !== null) {
-                positions.push(match.index);
-            }
-
-            let questionText = q.rawContent;
-            const options = [];
-
-            // 如果有找到选项
-            if (positions.length > 0) {
-                // 題目文字是第一个選項前的內容
-                questionText = q.rawContent.substring(0, positions[0]);
+            area.innerHTML = `<h1 style="color:#2c3e50; border-bottom:3px solid #3498db; padding-bottom:10px;">${unitName}</h1>`;
+            
+            problems.forEach((p, idx) => {
+                const raw = p['題目內容，可輸入 LaTeX'] || p['Text'] || '';
                 
-                // 切分出選項內容
-                for (let i = 0; i < positions.length; i++) {
-                    const start = positions[i];
-                    const end = (i + 1 < positions.length) ? positions[i+1] : q.rawContent.length;
-                    const optionContent = q.rawContent.substring(start, end).trim();
-                    if (optionContent) options.push(optionContent);
+                // 【核心修正】更安全的題目與選項切分邏輯
+                const optionMarkers = raw.match(/\(\d\)/g) || [];
+                let qBody = raw;
+                let opts = [];
+
+                if (optionMarkers.length > 0) {
+                    const firstOptIndex = raw.indexOf(optionMarkers[0]);
+                    qBody = raw.substring(0, firstOptIndex);
+                    // 根據 (1), (2)... 標記來切分選項
+                    opts = raw.substring(firstOptIndex).match(/\(\d\)[^(\n]*/g) || [];
                 }
+
+                const card = document.createElement('div');
+                card.className = 'card';
+                card.innerHTML = `
+                    <div class="theme-badge">${p['主題'] || '核心例題'}</div>
+                    <div class="problem-text">${qBody}</div>
+                    <div class="options-grid">
+                        ${opts.map(o => {
+                            const n = o.match(/\((\d)\)/)[1];
+                            return `<div class="opt-card" onclick="check('${n}', '${p['答案'] || p['Answer']}', this)">${o}</div>`;
+                        }).join('')}
+                    </div>
+                    <button class="btn-sol-toggle" onclick="toggleSol('${idx}')">查看詳細解析</button>
+                    <div id="sol-${idx}" class="sol-content">
+                        <strong>【專家解析】</strong><br><br>
+                        ${p['詳細解答'] || '請參考課堂筆記'}
+                    </div>
+                `;
+                area.appendChild(card);
+            });
+
+            // 觸發 KaTeX 渲染
+            renderMathInElement(area, {
+                delimiters: [
+                    {left: "$$", right: "$$", display: true},
+                    {left: "$", right: "$", display: false},
+                    {left: "\\(", right: "\\)", display: false}
+                ],
+                throwOnError: false
+            });
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function check(chosen, correct, btn) {
+            const ans = correct.toString().replace(/[^0-9]/g, '');
+            if(chosen === ans) {
+                btn.classList.add('correct');
+            } else {
+                btn.classList.add('wrong');
+                setTimeout(() => btn.classList.remove('wrong'), 600);
             }
-
-            const card = document.createElement('div');
-            card.className = 'question-card';
-            card.innerHTML = `
-                <span class="topic-tag">${q.topic}</span>
-                <div class="question-text"><strong>Q${idx+1}.</strong> ${questionText}</div>
-                <div class="options-grid">
-                    ${options.map((opt, i) => `
-                        <button class="option-btn" onclick="checkAnswer(this, '${i+1}', '${q.answer}', '${idx}')">
-                            ${opt}
-                        </button>
-                    `).join('')}
-                </div>
-                <div id="ans-${idx}" class="explanation">
-                    <div class="status-msg"></div>
-                    <div class="sol-text"><strong>解析：</strong>${q.solution}</div>
-                </div>
-            `;
-            container.appendChild(card);
-        });
-        
-        // 強制 MathJax 重新渲染，解決渲染失敗問題
-        if (window.MathJax && window.MathJax.typeset) {
-            window.MathJax.typeset();
         }
-    }
 
-    function checkAnswer(btn, selectedNum, correctAns, idx) {
-        const expDiv = document.getElementById(`ans-${idx}`);
-        const status = expDiv.querySelector('.status-msg');
-        const cleanCorrect = correctAns.replace(/\(|\)/g, "").trim();
-        
-        expDiv.style.display = "block";
-        if (selectedNum === cleanCorrect) {
-            status.innerHTML = "✅ 正確！";
-            status.style.color = "#27ae60";
-        } else {
-            status.innerHTML = `❌ 答錯了，正確答案是 (${cleanCorrect})`;
-            status.style.color = "#e74c3c";
+        function toggleSol(id) {
+            const s = document.getElementById(`sol-${id}`);
+            s.style.display = (s.style.display === 'block') ? 'none' : 'block';
         }
-    }
 
-    init();
-</script>
-
+        init();
+    </script>
 </body>
 </html>
