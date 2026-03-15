@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DLMA_33 小試身手</title>
+    <title>DLMA_33 小試身手 - 修正版</title>
     <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
     <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     <style>
@@ -23,7 +23,7 @@
         .topic-tag { display: inline-block; background: #e1f5fe; color: #01579b; padding: 2px 8px; border-radius: 4px; font-size: 0.85rem; margin-bottom: 10px; }
         .question-text { font-size: 1.1rem; line-height: 1.6; margin-bottom: 20px; }
         .options-grid { display: flex; flex-direction: column; gap: 10px; }
-        .option-btn { padding: 12px 15px; border: 1px solid #ddd; border-radius: 8px; background: #f9f9f9; text-align: left; cursor: pointer; transition: 0.2s; font-size: 1rem; }
+        .option-btn { padding: 12px 15px; border: 1px solid #ddd; border-radius: 8px; background: #f9f9f9; text-align: left; cursor: pointer; transition: 0.2s; font-size: 1rem; color: #333;}
         .option-btn:hover { background: #edf7ff; border-color: var(--accent-color); }
         .explanation { margin-top: 15px; padding: 15px; background: #f0fdf4; border-left: 4px solid #22c55e; display: none; border-radius: 4px; }
         .status-msg { font-weight: bold; margin-bottom: 10px; }
@@ -68,18 +68,17 @@
         for (let i = 2; i < rows.length; i++) {
             if (!rows[i].trim()) continue;
 
-            // 嚴謹解析：處理引號內的內容
             const matches = rows[i].match(/(".*?"|[^",\s]+)(?=\s*,|\s*$)/g);
             if (!matches || matches.length < 4) continue;
             
             const cleanCols = matches.map(c => c.replace(/^"|"$/g, '').trim());
 
             result.push({
-                chapter: cleanCols[0], // A:章節
-                topic: cleanCols[1],   // B:主題
-                rawContent: cleanCols[2], // C:題目內容
-                answer: cleanCols[3],  // D:答案
-                solution: cleanCols[4] || "" // E:詳細解答
+                chapter: cleanCols[0], 
+                topic: cleanCols[1],   
+                rawContent: cleanCols[2], 
+                answer: cleanCols[3],  
+                solution: cleanCols[4] || "" 
             });
         }
         return result;
@@ -93,16 +92,39 @@
         const filtered = allData.filter(q => q.chapter === chapterName);
 
         if (filtered.length === 0) {
-            container.innerHTML = `<p style="color:gray">目前「${chapterName}」沒有題目，請確認試算表 A 欄是否為「${chapterName}」。</p>`;
+            container.innerHTML = `<p style="color:gray">目前「${chapterName}」沒有題目。</p>`;
             return;
         }
 
         filtered.forEach((q, idx) => {
-            // 切分題目主體與 (1)~(5) 選項
-            // 由於你的內容裡括號可能包含 LaTeX，我們使用強大的正規表達式
-            const parts = q.rawContent.split(/\(\d\)/);
-            const questionText = parts[0];
-            const options = q.rawContent.match(/\(\d\)[^(\n]*/g) || [];
+            // 【核心修正】嚴謹選項切分邏輯
+            
+            // Regex: 尋找 (1), (2), (3), (4), (5)
+            const optionRegex = /(\(\d\))/g;
+            
+            // 找出所有括號選項出現的位置
+            let match;
+            const positions = [];
+            while ((match = optionRegex.exec(q.rawContent)) !== null) {
+                positions.push(match.index);
+            }
+
+            let questionText = q.rawContent;
+            const options = [];
+
+            // 如果有找到选项
+            if (positions.length > 0) {
+                // 題目文字是第一个選項前的內容
+                questionText = q.rawContent.substring(0, positions[0]);
+                
+                // 切分出選項內容
+                for (let i = 0; i < positions.length; i++) {
+                    const start = positions[i];
+                    const end = (i + 1 < positions.length) ? positions[i+1] : q.rawContent.length;
+                    const optionContent = q.rawContent.substring(start, end).trim();
+                    if (optionContent) options.push(optionContent);
+                }
+            }
 
             const card = document.createElement('div');
             card.className = 'question-card';
@@ -123,7 +145,11 @@
             `;
             container.appendChild(card);
         });
-        if (window.MathJax) MathJax.typeset();
+        
+        // 強制 MathJax 重新渲染，解決渲染失敗問題
+        if (window.MathJax && window.MathJax.typeset) {
+            window.MathJax.typeset();
+        }
     }
 
     function checkAnswer(btn, selectedNum, correctAns, idx) {
