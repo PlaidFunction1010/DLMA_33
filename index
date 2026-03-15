@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>小試身手 - 數學練習網站</title>
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --bg-color: #f4f7f6;
+            --sidebar-width: 250px;
+        }
+        body {
+            font-family: "Microsoft JhengHei", Arial, sans-serif;
+            margin: 0;
+            display: flex;
+            background-color: var(--bg-color);
+        }
+        /* 側邊欄樣式 */
+        #sidebar {
+            width: var(--sidebar-width);
+            height: 100vh;
+            background: var(--primary-color);
+            color: white;
+            position: fixed;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+        #sidebar h2 { font-size: 1.2rem; margin-bottom: 20px; border-bottom: 1px solid #555; padding-bottom: 10px; }
+        .chapter-btn {
+            display: block;
+            width: 100%;
+            padding: 10px;
+            margin: 5px 0;
+            background: none;
+            border: 1px solid #555;
+            color: white;
+            text-align: left;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+        .chapter-btn:hover { background: #34495e; }
+        .chapter-btn.active { background: #3498db; border-color: #3498db; }
+
+        /* 主要內容區 */
+        #main-content {
+            margin-left: var(--sidebar-width);
+            padding: 40px;
+            width: 100%;
+            max-width: 800px;
+        }
+        .question-card {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        .options { margin-top: 15px; }
+        .option-btn {
+            display: block;
+            width: 100%;
+            padding: 10px;
+            margin: 5px 0;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            background: #fff;
+            text-align: left;
+            cursor: pointer;
+        }
+        .option-btn:hover { background: #f0f0f0; }
+        .feedback { margin-top: 10px; font-weight: bold; }
+        .correct { color: #27ae60; }
+        .wrong { color: #e74c3c; }
+    </style>
+</head>
+<body>
+
+<div id="sidebar">
+    <h2>DLMA_33 小試身手</h2>
+    <p>選擇章節：</p>
+    <button class="chapter-btn" onclick="loadChapter('第一章')">第一章</button>
+    <button class="chapter-btn" onclick="loadChapter('第二章')">第二章</button>
+    <button class="chapter-btn" onclick="loadChapter('第三章')">第三章</button>
+    <button class="chapter-btn" onclick="loadChapter('第四章')">第四章</button>
+</div>
+
+<div id="main-content">
+    <h1 id="current-chapter-title">請選擇章節開始練習</h1>
+    <div id="questions-container">
+        </div>
+</div>
+
+<script>
+    const csvUrl = "https://docs.google.com/spreadsheets/d/e/2PACX-1vS7n1NCzcwQpMfJaxFaVJwtRQFeoABAGNgoyh_cC6LzrF8RVp-1OujZgMXO-uR1XZtL9VZIxFLQjnzs/pub?output=csv";
+    let allQuestions = [];
+
+    // 初始化：抓取資料
+    async function init() {
+        try {
+            const response = await fetch(csvUrl);
+            const data = await response.text();
+            allQuestions = parseCSV(data);
+            console.log("資料載入成功", allQuestions);
+        } catch (error) {
+            console.error("資料載入失敗:", error);
+        }
+    }
+
+    // CSV 解析邏輯
+    function parseCSV(csvText) {
+        const lines = csvText.split('\n');
+        const headers = lines[0].split(',');
+        return lines.slice(1).map(line => {
+            const values = line.split(',');
+            // 假設 CSV 欄位順序：章節, 題目, 選項A, 選項B, 選項C, 選項D, 正確答案
+            return {
+                chapter: values[0]?.trim(),
+                content: values[1]?.trim(),
+                options: [values[2], values[3], values[4], values[5]],
+                answer: values[6]?.trim()
+            };
+        });
+    }
+
+    // 切換章節並渲染題目
+    function loadChapter(chapterName) {
+        document.getElementById('current-chapter-title').innerText = chapterName;
+        const container = document.getElementById('questions-container');
+        container.innerHTML = ""; // 清空舊題目
+
+        const filtered = allQuestions.filter(q => q.chapter === chapterName);
+
+        if (filtered.length === 0) {
+            container.innerHTML = "<p>目前此章節尚無題目。</p>";
+            return;
+        }
+
+        filtered.forEach((q, index) => {
+            const card = document.createElement('div');
+            card.className = 'question-card';
+            card.innerHTML = `
+                <p><strong>第 ${index + 1} 題：</strong> ${q.content}</p>
+                <div class="options">
+                    ${q.options.map((opt, i) => `
+                        <button class="option-btn" onclick="checkAnswer(this, '${opt}', '${q.answer}')">
+                            ${String.fromCharCode(65 + i)}. ${opt}
+                        </button>
+                    `).join('')}
+                </div>
+                <div class="feedback"></div>
+            `;
+            container.appendChild(card);
+        });
+
+        // 重新渲染 LaTeX
+        MathJax.typeset();
+    }
+
+    // 檢查答案
+    function checkAnswer(btn, selected, correct) {
+        const feedback = btn.parentElement.nextElementSibling;
+        if (selected.trim() === correct.trim()) {
+            feedback.innerHTML = "✅ 正確！";
+            feedback.className = "feedback correct";
+        } else {
+            feedback.innerHTML = "❌ 再試一次！";
+            feedback.className = "feedback wrong";
+        }
+    }
+
+    init();
+</script>
+
+</body>
+</html>
