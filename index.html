@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>plaidfunction1010 | DLMA_33</title>
+    <title>plaidfunction1010 | 數學互動學習戰情室</title>
     
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
     <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
@@ -13,60 +13,79 @@
 
     <style>
         :root { 
-            --sidebar-width: 280px; 
-            --primary-gradient: linear-gradient(135deg, #1e272e 0%, #000000 100%);
+            --sidebar-width: 300px; 
+            --primary-gradient: linear-gradient(135deg, #2c3e50 0%, #000000 100%);
             --accent-color: #3498db; 
-            --bg-color: #f4f6f8; 
-            --card-shadow: 0 10px 40px rgba(0,0,0,0.08);
+            --bg-color: #f0f2f5; 
+            --card-shadow: 0 8px 30px rgba(0,0,0,0.05);
             --success-color: #27ae60;
         }
 
         body { 
             font-family: 'Noto Sans TC', sans-serif; 
-            margin: 0; display: flex; height: 100vh; 
+            margin: 0; 
+            display: flex; 
+            height: 100vh; 
             background-color: var(--bg-color);
-            -webkit-user-select: none; user-select: none;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
         }
 
-        /* 側邊欄優化 */
         #sidebar { 
             width: var(--sidebar-width); 
             background: var(--primary-gradient); 
-            color: white; display: flex; flex-direction: column;
-            box-shadow: 4px 0 15px rgba(0,0,0,0.2);
+            color: white; 
+            display: flex; 
+            flex-direction: column; 
+            box-shadow: 4px 0 15px rgba(0,0,0,0.1);
         }
 
-        #sidebar h2 { padding: 30px 20px; font-size: 1.5rem; text-align: center; border-bottom: 1px solid rgba(255,255,255,0.1); }
+        #sidebar h2 { padding: 40px 20px; font-size: 1.4rem; letter-spacing: 1px; border-bottom: 1px solid rgba(255,255,255,0.1); margin: 0; text-align: center; }
 
-        .unit-list-container { flex-grow: 1; overflow-y: auto; }
-        .unit-item { padding: 15px 25px; cursor: pointer; transition: 0.3s; color: #95a5a6; border-left: 4px solid transparent; }
+        .unit-list-container { flex-grow: 1; overflow-y: auto; padding: 20px 0; }
+        .unit-item { padding: 18px 25px; cursor: pointer; transition: 0.2s; border-left: 5px solid transparent; font-weight: 500; color: #bdc3c7; }
         .unit-item:hover { background: rgba(255,255,255,0.05); color: white; }
-        .unit-item.active { background: rgba(52, 152, 219, 0.2); border-left: 4px solid var(--accent-color); color: white; }
+        .unit-item.active { background: rgba(52, 152, 219, 0.15); border-left: 5px solid var(--accent-color); color: white; }
 
-        #main-content { flex-grow: 1; padding: 40px; overflow-y: auto; scroll-behavior: smooth; }
-
+        #main-content { flex-grow: 1; padding: 50px; overflow-y: auto; scroll-behavior: smooth; }
+        
         .card { 
-            background: white; padding: 30px; border-radius: 15px; 
-            box-shadow: var(--card-shadow); margin-bottom: 35px; color: #333;
+            background: white; 
+            padding: 35px; 
+            border-radius: 20px; 
+            box-shadow: var(--card-shadow); 
+            margin-bottom: 40px; 
+            border: 1px solid rgba(0,0,0,0.02);
+            transition: transform 0.3s;
         }
 
-        .theme-badge { background: #e3f2fd; color: #1976d2; padding: 3px 12px; border-radius: 5px; font-size: 0.8rem; font-weight: bold; margin-bottom: 15px; display: inline-block; }
-        .problem-text { font-size: 1.2rem; line-height: 1.8; margin-bottom: 25px; }
+        .theme-badge { background: #ebf5ff; color: #007bff; padding: 4px 12px; border-radius: 50px; font-size: 0.75rem; font-weight: 700; margin-bottom: 20px; display: inline-block; }
+        
+        .problem-img { width: 100%; max-height: 450px; object-fit: contain; border-radius: 12px; margin-bottom: 25px; border: 1px solid #f0f0f0; background: #fff; }
 
-        /* 選項網格 */
-        .options-grid { display: flex; flex-direction: column; gap: 12px; margin-bottom: 25px; }
+        .problem-text { font-size: 1.25rem; line-height: 1.9; color: #2d3436; margin-bottom: 30px; }
+        
+        .options-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 15px; margin-bottom: 30px; }
         .opt-card { 
-            padding: 15px 20px; border: 1.5px solid #eee; border-radius: 10px; 
-            cursor: pointer; transition: 0.2s; background: #fff;
+            padding: 18px; 
+            border: 2px solid #f1f3f5; 
+            border-radius: 12px; 
+            cursor: pointer; 
+            transition: 0.2s; 
+            font-size: 1.05rem;
+            background: #fff;
         }
-        .opt-card:hover { border-color: var(--accent-color); background: #f0f7ff; }
+        .opt-card:hover { border-color: var(--accent-color); background: #f8fbff; }
         .opt-card.correct { background: var(--success-color) !important; color: white; border-color: var(--success-color); }
-        .opt-card.wrong { background: #e74c3c !important; color: white; border-color: #c0392b; }
+        .opt-card.wrong { background: #ff7675 !important; color: white; border-color: #d63031; }
 
-        .btn-sol-toggle { background: #eee; color: #555; padding: 10px; border-radius: 8px; border: none; cursor: pointer; width: 100%; font-weight: bold; }
-        .sol-content { margin-top: 15px; padding: 20px; background: #fffde7; border-left: 5px solid #f1c40f; display: none; border-radius: 8px; }
+        .btn-sol-toggle { background: #f8f9fa; color: #636e72; padding: 12px; border-radius: 10px; border: 1px solid #e9ecef; cursor: pointer; width: 100%; font-weight: 700; transition: 0.2s; }
+        
+        .sol-content { margin-top: 20px; padding: 25px; background: #fffde7; border-radius: 12px; border-left: 6px solid #f1c40f; display: none; line-height: 1.8; }
 
-        #visitor-counter { position: fixed; bottom: 15px; left: 15px; background: rgba(0,0,0,0.8); padding: 5px 12px; border-radius: 20px; color: white; font-size: 12px; }
+        #visitor-counter { position: fixed; bottom: 20px; left: 20px; background: rgba(0,0,0,0.8); padding: 8px 15px; border-radius: 30px; color: white; font-size: 12px; z-index: 2000; }
     </style>
 </head>
 <body oncontextmenu="return false;">
@@ -78,18 +97,20 @@
 
     <main id="main-content">
         <div id="display-area">
-            <div style="text-align:center; margin-top:150px; color:gray;">
-                <h1>歡迎</h1>
-                <p>請從左側選單選擇章節練習</p>
+            <div style="text-align:center; margin-top:150px; opacity:0.3;">
+                <h1 style="font-size:3rem;">MASTER MATHEMATICS</h1>
+                <p>請選擇單元開啟你的學習旅程</p>
             </div>
         </div>
     </main>
 
     <div id="visitor-counter">
-        🚀 使用次數：<img src="https://hits.dwyl.com/plaidfunction1010/runningmath.svg" style="vertical-align: middle;">
+        🚀 戰情室人氣：
+        <img src="https://hits.dwyl.com/plaidfunction1010/runningmath.svg" alt="Hits" style="vertical-align: middle;">
     </div>
 
     <script>
+        // 已更換為你的專案連結：runningmath
         const sheetCsvUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTA19q_bXVl7XZPAf4ImCJEWZfs_zJwFuSFsBmAf3n-_I_zrkb8cuzyxMWrUJhpBB7xpnQ9baoEDh1U/pub?output=csv'; 
         let allData = [];
 
@@ -97,8 +118,7 @@
             Papa.parse(sheetCsvUrl, {
                 download: true, header: true,
                 complete: function(results) {
-                    // 跳過前兩列英文與標題說明，過濾空行
-                    allData = results.data.slice(1).filter(r => r['章節'] || r['Unit']);
+                    allData = results.data.slice(1).filter(r => r['單元名稱'] || r['Unit']);
                     renderSidebar();
                 }
             });
@@ -106,7 +126,7 @@
 
         function renderSidebar() {
             const container = document.getElementById('unit-list');
-            const units = [...new Set(allData.map(d => d['章節'] || d['Unit']))];
+            const units = [...new Set(allData.map(d => d['單元名稱'] || d['Unit']))];
             container.innerHTML = units.map(u => `<div class="unit-item" onclick="loadUnit('${u}', this)">${u}</div>`).join('');
         }
 
@@ -115,29 +135,21 @@
             el.classList.add('active');
             
             const area = document.getElementById('display-area');
-            const problems = allData.filter(d => (d['章節'] || d['Unit']) === unitName);
+            const problems = allData.filter(d => (d['單元名稱'] || d['Unit']) === unitName);
             
-            area.innerHTML = `<h1 style="color:#2c3e50; border-bottom:3px solid #3498db; padding-bottom:10px;">${unitName}</h1>`;
+            area.innerHTML = `<h1 style="margin-bottom:40px; color:#2c3e50; border-bottom:2px solid #eee; padding-bottom:10px;">${unitName}</h1>`;
             
             problems.forEach((p, idx) => {
                 const raw = p['題目內容，可輸入 LaTeX'] || p['Text'] || '';
-                
-                // 【核心修正】更安全的題目與選項切分邏輯
-                const optionMarkers = raw.match(/\(\d\)/g) || [];
-                let qBody = raw;
-                let opts = [];
-
-                if (optionMarkers.length > 0) {
-                    const firstOptIndex = raw.indexOf(optionMarkers[0]);
-                    qBody = raw.substring(0, firstOptIndex);
-                    // 根據 (1), (2)... 標記來切分選項
-                    opts = raw.substring(firstOptIndex).match(/\(\d\)[^(\n]*/g) || [];
-                }
+                const img = p['圖片網址'] || p['ImageURL'] || '';
+                const qBody = raw.split(/\(\d\)/)[0];
+                const opts = raw.match(/\(\d\)[^(]*/g) || [];
 
                 const card = document.createElement('div');
                 card.className = 'card';
                 card.innerHTML = `
                     <div class="theme-badge">${p['主題'] || '核心例題'}</div>
+                    ${img ? `<img src="${img}" class="problem-img">` : ''}
                     <div class="problem-text">${qBody}</div>
                     <div class="options-grid">
                         ${opts.map(o => {
@@ -145,34 +157,26 @@
                             return `<div class="opt-card" onclick="check('${n}', '${p['答案'] || p['Answer']}', this)">${o}</div>`;
                         }).join('')}
                     </div>
-                    <button class="btn-sol-toggle" onclick="toggleSol('${idx}')">查看詳細解析</button>
-                    <div id="sol-${idx}" class="sol-content">
-                        <strong>【專家解析】</strong><br><br>
-                        ${p['詳細解答'] || '請參考課堂筆記'}
-                    </div>
+                    <button class="btn-sol-toggle" onclick="toggleSol('${unitName}-${idx}')">查看詳細解析</button>
+                    <div id="sol-${unitName}-${idx}" class="sol-content"><strong>【專家解析】</strong><br><br>${p['詳細解答'] || '請洽授課老師'}</div>
                 `;
                 area.appendChild(card);
             });
 
-            // 觸發 KaTeX 渲染
             renderMathInElement(area, {
-                delimiters: [
-                    {left: "$$", right: "$$", display: true},
-                    {left: "$", right: "$", display: false},
-                    {left: "\\(", right: "\\)", display: false}
-                ],
+                delimiters: [{left: "$$", right: "$$", display: true}, {left: "$", right: "$", display: false}, {left: "\\(", right: "\\)", display: false}],
                 throwOnError: false
             });
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
         function check(chosen, correct, btn) {
-            const ans = correct.toString().replace(/[^0-9]/g, '');
+            const ans = correct.replace(/[^0-9]/g, '');
             if(chosen === ans) {
                 btn.classList.add('correct');
             } else {
                 btn.classList.add('wrong');
-                setTimeout(() => btn.classList.remove('wrong'), 600);
+                setTimeout(() => btn.classList.remove('wrong'), 500);
             }
         }
 
